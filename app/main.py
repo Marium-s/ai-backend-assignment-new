@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from app.ollama_client import ask_ollama
 from app.openai_client import ask_openai
 import time
+from app.neo4j_client import test_connection, store_user_chat, driver
 
 app = FastAPI()
 
@@ -36,6 +37,10 @@ def chat(request: ChatRequest):
         openai_latency = None
         openai_error = str(e)
 
+    if ollama_resp:
+        # Extract string if response is dict
+        resp_text = ollama_resp["response"] if isinstance(ollama_resp, dict) else ollama_resp
+        store_user_chat("user1", request.message, resp_text)
 
     return {
         "ollama": {
@@ -49,3 +54,28 @@ def chat(request: ChatRequest):
             "error": openai_error
         }
     }
+
+    if ollama_resp:  # only store if response exists
+     store_user_chat("user1", request.message, ollama_resp)
+
+    
+  
+
+@app.get("/test-neo4j")
+def test_neo4j():
+    message = test_connection()
+    return {"message": message}
+
+@app.get("/get-chats")
+def get_chats():
+    with driver.session() as session:
+        result = session.run("""
+        MATCH (u:User)-[:SENT]->(c:Chat)
+        RETURN u.id AS user, c.message AS message, c.response AS response
+        """)
+
+        data = []
+        for record in result:
+            data.append(record.data())
+
+        return data
