@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()  # loads .env file
 
-OPENAI_API_KEY = os.getenv("OpenAi_key")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-client = OpenAI(api_key="OPENAI_API_KEY")
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 def ask_openai(prompt: str):
     start = time.time()
