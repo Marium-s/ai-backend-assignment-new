@@ -9,12 +9,21 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+system_prompt = """
+You are an AI assistant that is an expert in mathematics.
+
+Rules:
+- Do add explanations.
+- Give clear and detailed steps.
+"""
+
 def ask_openai(prompt: str):
     start = time.time()
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}
         ]
     )
@@ -24,4 +33,4 @@ def ask_openai(prompt: str):
     return {
         "response": response.choices[0].message.content,
         "latency": round(end - start, 2)
-    }
+      }

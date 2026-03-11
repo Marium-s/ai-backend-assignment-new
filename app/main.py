@@ -8,6 +8,7 @@ from app.neo4j_client import test_connection, store_user_chat, driver
 app = FastAPI()
 
 class ChatRequest(BaseModel):
+    username: str
     message: str
 
 @app.get("/")
@@ -40,7 +41,11 @@ def chat(request: ChatRequest):
     if ollama_resp:
         # Extract string if response is dict
         resp_text = ollama_resp["response"] if isinstance(ollama_resp, dict) else ollama_resp
-        store_user_chat("user1", request.message, resp_text)
+        store_user_chat(request.username, request.message, resp_text)
+    
+    if openai_resp:
+       resp_text = openai_resp["response"] if isinstance(openai_resp, dict) else openai_resp
+       store_user_chat(request.username, request.message, resp_text)
 
     return {
         "ollama": {
@@ -55,10 +60,6 @@ def chat(request: ChatRequest):
         }
     }
 
-    if ollama_resp:  # only store if response exists
-     store_user_chat("user1", request.message, ollama_resp)
-
-    
 
 @app.get("/test-neo4j")
 def test_neo4j():

@@ -4,6 +4,7 @@ import time
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
+
 def ask_ollama(prompt: str):
     start = time.time()  # Start timer
 
